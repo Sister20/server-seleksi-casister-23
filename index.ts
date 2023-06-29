@@ -60,17 +60,74 @@ app.post("/test", (req, res) => {
     return;
   }
   //akses aman
-  console.log("Request diterima")
   res.status(201);
   res.setHeader("Content-Type", "text/plain; charset=UTF-8");
-  res.send("Tes submit sukses");
+  res.send("Tes submit sukses! Silahkan submit berkas ke endpoint sebenarnya");
 });
 //buat submit bagian a
 app.post("/submit/a", (req, res) => {
+  //cek authorization header
+  const auth_header = req.headers.authorization;
+  if (!auth_header) {
+    res.status(401).send("Unauthorized to access endpoint");
+    return;
+  }
+  //parse authorization
+  try {
+    //parse username dan password
+    const [user, password] = Buffer.from(auth_header.split(" ")[1], "base64")
+      .toString()
+      .split(":");
+    //cek username apakah valid
+    //cek otp nya apakah valid
+    if (
+      password !== generateOTP((process.env.SHARED_SECRET_BASE || "")+user)
+    ) {
+      res.status(401).send("Unauthorized to access endpoint");
+      return;
+    }
+  } catch (err) {
+    console.log(err);
+    res.status(401).send("Unauthorized to access endpoint");
+    return;
+  }
+  //akses aman
+  //TODO: simpan request
+  res.status(201);
+  res.setHeader("Content-Type", "text/plain; charset=UTF-8");
   res.send("Congratulations on completing part a!");
 });
 //buat submit bagian b
 app.post("/submit/b", (req, res) => {
+  //cek authorization header
+  const auth_header = req.headers.authorization;
+  if (!auth_header) {
+    res.status(401).send("Unauthorized to access endpoint");
+    return;
+  }
+  //parse authorization
+  try {
+    //parse username dan password
+    const [user, password] = Buffer.from(auth_header.split(" ")[1], "base64")
+      .toString()
+      .split(":");
+    //cek username apakah valid
+    //cek otp nya apakah valid
+    if (
+      password !== generateOTP((process.env.SHARED_SECRET_BASE || "")+user)
+    ) {
+      res.status(401).send("Unauthorized to access endpoint");
+      return;
+    }
+  } catch (err) {
+    console.log(err);
+    res.status(401).send("Unauthorized to access endpoint");
+    return;
+  }
+  //akses aman
+  //TODO: simpan request
+  res.status(201);
+  res.setHeader("Content-Type", "text/plain; charset=UTF-8");
   res.send("Congratulations on completing part b!");
 });
 
