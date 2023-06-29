@@ -14,12 +14,8 @@ const port = process.env.PORT || 3000;
 function generateOTP(secret: string, duration: number = 30) {
   //defaultnya 30 detik
   //set interval number
-  console.log("secret:"+secret)
   const INTERVALS_NUMBER = Math.floor(Date.now() / (1000 * duration));
   //algoritma utama
-  // const key = Buffer.from(secret, "base64");
-  // const key = secret
-  console.log("key b",secret)
   const msg = Buffer.alloc(8);
   msg.writeBigInt64BE(BigInt(INTERVALS_NUMBER));
   const hmac = crypto.createHmac("sha256", secret).update(msg).digest();
@@ -32,7 +28,6 @@ function generateOTP(secret: string, duration: number = 30) {
   const hotp = truncated_hash %  Math.pow(10,8)
   //padding bila kurang dari 8 digit
   const otp = hotp.toString().padStart(8, "0");
-  console.log(otp);
   return otp;
 }
 
@@ -41,7 +36,6 @@ function generateOTP(secret: string, duration: number = 30) {
 app.post("/test", (req, res) => {
   //cek authorization header
   const auth_header = req.headers.authorization;
-  console.log(auth_header);
   if (!auth_header) {
     res.status(401).send("Unauthorized to access endpoint");
     return;
@@ -52,7 +46,6 @@ app.post("/test", (req, res) => {
     const [user, password] = Buffer.from(auth_header.split(" ")[1], "base64")
       .toString()
       .split(":");
-    console.log(user, password);
     //cek username apakah valid
     //cek otp nya apakah valid
     if (
@@ -67,6 +60,7 @@ app.post("/test", (req, res) => {
     return;
   }
   //akses aman
+  console.log("Request diterima")
   res.status(201);
   res.setHeader("Content-Type", "text/plain; charset=UTF-8");
   res.send("Tes submit sukses");
