@@ -1,11 +1,40 @@
 import express from "express";
 import bodyParser from "body-parser";
+import * as crypto from "crypto";
+import * as dotenv from "dotenv"
 
 const app = express();
-//conigure express
+//configure express
 app.use(bodyParser.json());
+//configure dotenv
+dotenv.config()
 //set port
 const port = process.env.PORT || 3000;
+//fungsi buat generate OTP
+function generateOTP(secret: string, duration: number = 30) {
+  //defaultnya 30 detik
+  //set interval number
+  console.log("secret:"+secret)
+  const INTERVALS_NUMBER = Math.floor(Date.now() / (1000 * duration));
+  //algoritma utama
+  // const key = Buffer.from(secret, "base64");
+  // const key = secret
+  console.log("key b",secret)
+  const msg = Buffer.alloc(8);
+  msg.writeBigInt64BE(BigInt(INTERVALS_NUMBER));
+  const hmac = crypto.createHmac("sha256", secret).update(msg).digest();
+  const offset = hmac[hmac.length - 1] & 0xf;
+  const truncated_hash =
+    ((hmac[offset] & 0x7f) << 24) |
+    ((hmac[offset + 1] & 0xff) << 16) |
+    ((hmac[offset + 2] & 0xff) << 8) |
+    (hmac[offset + 3] & 0xff);
+  const hotp = truncated_hash %  Math.pow(10,8)
+  //padding bila kurang dari 8 digit
+  const otp = hotp.toString().padStart(8, "0");
+  console.log(otp);
+  return otp;
+}
 
 //endpoint
 //buat tes submit
@@ -25,11 +54,19 @@ app.post("/test", (req, res) => {
       .split(":");
     console.log(user, password);
     //cek username apakah valid
+    //cek otp nya apakah valid
+    if (
+      password !== generateOTP((process.env.SHARED_SECRET_BASE || "")+user)
+    ) {
+      res.status(401).send("Unauthorized to access endpoint");
+      return;
+    }
   } catch (err) {
     console.log(err);
     res.status(401).send("Unauthorized to access endpoint");
     return;
   }
+  //akses aman
   res.status(201);
   res.setHeader("Content-Type", "text/plain; charset=UTF-8");
   res.send("Tes submit sukses");
