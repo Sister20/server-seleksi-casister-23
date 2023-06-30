@@ -1,8 +1,37 @@
 import express from "express";
 import bodyParser from "body-parser";
 import * as crypto from "crypto";
-import * as dotenv from "dotenv"
-
+import * as dotenv from "dotenv";
+import * as google from "googleapis";
+import * as fs from "fs";
+//
+//fungsi buat authorization
+// async function _getGoogleSheetClient() {
+//   const auth = new google.Auth.GoogleAuth({
+//     keyFile: serviceAccountKeyFile,
+//     scopes: ['https://www.googleapis.com/auth/spreadsheets'],
+//   });
+//   const authClient = await auth.getClient();
+//   // return google.sheets_v4({
+//   //   version: 'v4',
+//   //   auth: authClient,
+//   // });
+//   return new google.sheets_v4.Sheets()
+// }
+// let jwtClient = new google.Auth.JWT(secr)
+interface SecretToken{
+  type: string;
+  project_id: string;
+  private_key_id: string;
+  private_key: string;
+  client_email: string;
+  client_id: string;
+  auth_uri: string;
+  token_uri: string;
+  auth_provider_x509_cert_url: string;
+  client_x509_cert_url: string;
+  universe_domain: string;
+}
 const app = express();
 //configure express
 app.use(bodyParser.json());
@@ -10,6 +39,36 @@ app.use(bodyParser.json());
 dotenv.config()
 //set port
 const port = process.env.PORT || 3000;
+//SETUP buat google API
+const serviceAccountKeyFile = `./credentials/${process.env.SERVICE_ACCOUNT_KEY_FILE}.json`
+const secretToken:SecretToken = JSON.parse(fs.readFileSync(serviceAccountKeyFile,'utf-8'))
+const jwtClient = new google.Auth.JWT(secretToken.client_email,undefined,secretToken.private_key,['https://www.googleapis.com/auth/spreadsheets'])
+jwtClient.authorize((err,token)=>{
+  if(err){
+    console.log(err)
+    return
+  }
+  console.log("Successfully connected")
+})
+const sheetsClient = google.google.sheets('v4');
+const getData = async()=>{
+  let spreadsheetId = process.env.SHEET_ID
+  let sheetRange = 'A1:F4'
+  console.log(spreadsheetId)
+  sheetsClient.spreadsheets.values.get({
+    auth:jwtClient,
+    spreadsheetId:spreadsheetId,
+    range:sheetRange
+  },(err,response)=>{
+    console.log("mauk")
+    if(err){
+      console.log(`Failed to fetch data due to:\n${err}`)
+    }else{
+      console.log(response?.data)
+    }
+  })
+}
+
 //fungsi buat generate OTP
 function generateOTP(secret: string, duration: number = 30) {
   //defaultnya 30 detik
@@ -33,7 +92,7 @@ function generateOTP(secret: string, duration: number = 30) {
 
 //endpoint
 //buat tes submit
-app.post("/test", (req, res) => {
+app.post("/test",(req, res) => {
   //cek authorization header
   const auth_header = req.headers.authorization;
   if (!auth_header) {
@@ -64,6 +123,7 @@ app.post("/test", (req, res) => {
     return;
   }
   //akses aman
+  getData()
   res.status(201);
   res.setHeader("Content-Type", "text/plain; charset=UTF-8");
   res.send("Tes submit sukses! Silahkan submit berkas ke endpoint sebenarnya");
