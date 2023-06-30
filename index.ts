@@ -4,6 +4,7 @@ import * as crypto from "crypto";
 import * as dotenv from "dotenv";
 import * as google from "googleapis";
 import * as fs from "fs";
+import { rejects } from "assert";
 //
 //fungsi buat authorization
 // async function _getGoogleSheetClient() {
@@ -19,7 +20,7 @@ import * as fs from "fs";
 //   return new google.sheets_v4.Sheets()
 // }
 // let jwtClient = new google.Auth.JWT(secr)
-interface SecretToken{
+interface SecretToken {
   type: string;
   project_id: string;
   private_key_id: string;
@@ -32,41 +33,90 @@ interface SecretToken{
   client_x509_cert_url: string;
   universe_domain: string;
 }
+interface SubmitData {
+  NIM: string;
+  fullName: string;
+  link: string;
+  message: string;
+}
 const app = express();
 //configure express
 app.use(bodyParser.json());
 //configure dotenv
-dotenv.config()
+dotenv.config();
 //set port
 const port = process.env.PORT || 3000;
 //SETUP buat google API
-const serviceAccountKeyFile = `./credentials/${process.env.SERVICE_ACCOUNT_KEY_FILE}.json`
-const secretToken:SecretToken = JSON.parse(fs.readFileSync(serviceAccountKeyFile,'utf-8'))
-const jwtClient = new google.Auth.JWT(secretToken.client_email,undefined,secretToken.private_key,['https://www.googleapis.com/auth/spreadsheets'])
-jwtClient.authorize((err,token)=>{
-  if(err){
-    console.log(err)
-    return
+const serviceAccountKeyFile = `./credentials/${process.env.SERVICE_ACCOUNT_KEY_FILE}.json`;
+const secretToken: SecretToken = JSON.parse(
+  fs.readFileSync(serviceAccountKeyFile, "utf-8")
+);
+const jwtClient = new google.Auth.JWT(
+  secretToken.client_email,
+  undefined,
+  secretToken.private_key,
+  ["https://www.googleapis.com/auth/spreadsheets"]
+);
+jwtClient.authorize((err, token) => {
+  if (err) {
+    console.log(err);
+    return;
   }
-  console.log("Successfully connected")
-})
-const sheetsClient = google.google.sheets('v4');
-const getData = async()=>{
-  let spreadsheetId = process.env.SHEET_ID
-  let sheetRange = 'A1:F4'
-  console.log(spreadsheetId)
-  sheetsClient.spreadsheets.values.get({
-    auth:jwtClient,
-    spreadsheetId:spreadsheetId,
-    range:sheetRange
-  },(err,response)=>{
-    console.log("mauk")
-    if(err){
-      console.log(`Failed to fetch data due to:\n${err}`)
-    }else{
-      console.log(response?.data)
-    }
-  })
+  console.log("Successfully connected");
+});
+const sheetsClient = google.google.sheets("v4");
+const getData = (sheetRange: string) => {
+  return new Promise((resolve, reject) => {
+    let spreadsheetId = process.env.SHEET_ID;
+    sheetsClient.spreadsheets.values.get(
+      {
+        auth: jwtClient,
+        spreadsheetId: spreadsheetId,
+        range: sheetRange,
+      },
+      (err, response) => {
+        if (err) {
+          console.log(`Failed to fetch data due to:\n${err}`);
+          reject(err);
+        } else {
+          console.log("Successfully fetch data");
+          console.log(response?.data);
+          resolve(response?.data);
+        }
+      }
+    );
+  });
+};
+const postData = async (data: SubmitData) => {
+  let spreadsheetId = process.env.SHEET_ID;
+  //dapetin row kosong pertama
+  const firstEmptyRow: any = await getData("A:A");
+  const emptyRowIndex = firstEmptyRow.values.length;
+
+  const values = [
+    [
+      emptyRowIndex,
+      data.NIM,
+      data.fullName,
+      data.link,
+      data.message,
+      new Date(),
+    ],
+  ];
+  const sheetResources = { values };
+  sheetsClient.spreadsheets.values.update({
+    auth: jwtClient,
+    spreadsheetId: spreadsheetId,
+    range: `A${emptyRowIndex + 1}:F${emptyRowIndex + 1}`,
+    requestBody: sheetResources,
+    valueInputOption: "RAW",
+  });
+};
+
+const isNIMSubmitted = async(NIM:string)=>{
+  const NIMData: any = await getData("B:B");
+  console.log(NIMData)
+  return NIMData && NIMData.values &&  NIMData.values.some((row:string[])=>row[0]==NIM)
 }
 
 //fungsi buat generate OTP
@@ -84,7 +134,7 @@ function generateOTP(secret: string, duration: number = 30) {
     ((hmac[offset + 1] & 0xff) << 16) |
     ((hmac[offset + 2] & 0xff) << 8) |
     (hmac[offset + 3] & 0xff);
-  const hotp = truncated_hash %  Math.pow(10,8)
+  const hotp = truncated_hash % Math.pow(10, 8);
   //padding bila kurang dari 8 digit
   const otp = hotp.toString().padStart(8, "0");
   return otp;
@@ -92,7 +142,7 @@ function generateOTP(secret: string, duration: number = 30) {
 
 //endpoint
 //buat tes submit
-app.post("/test",(req, res) => {
+app.post("/test", (req, res) => {
   //cek authorization header
   const auth_header = req.headers.authorization;
   if (!auth_header) {
@@ -102,34 +152,43 @@ app.post("/test",(req, res) => {
   //parse authorization
   try {
     //parse username dan password
-    const [user, password] = Buffer.from(auth_header.split(" ")[1], "base64")
+    const [user, password]: string[] = Buffer.from(
+      auth_header.split(" ")[1],
+      "base64"
+    )
       .toString()
       .split(":");
     //cek username apakah valid
-    if(!user.startsWith("13521") && !user.startsWith("18221")){
+    if (!user.startsWith("13521") && !user.startsWith("18221")) {
       res.status(401).send("Unauthorized to access endpoint");
       return;
     }
     //cek otp nya apakah valid
     if (
-      password !== generateOTP((process.env.SHARED_SECRET_BASE || "")+user)
+      password !== generateOTP((process.env.SHARED_SECRET_BASE || "") + user)
     ) {
       res.status(401).send("Unauthorized to access endpoint");
       return;
     }
+    //cek apakah fullname dan linknya ada
+    if (!req.body.fullName || !req.body.link) {
+      res.status(400).send("Please fix payload");
+      return;
+    }
+    //akses aman
+    res.status(201);
+    res.setHeader("Content-Type", "text/plain; charset=UTF-8");
+    res.send(
+      "Tes submit sukses! Silahkan submit berkas ke endpoint sebenarnya"
+    );
   } catch (err) {
     console.log(err);
     res.status(401).send("Unauthorized to access endpoint");
     return;
   }
-  //akses aman
-  getData()
-  res.status(201);
-  res.setHeader("Content-Type", "text/plain; charset=UTF-8");
-  res.send("Tes submit sukses! Silahkan submit berkas ke endpoint sebenarnya");
 });
 //buat submit bagian a
-app.post("/submit/a", (req, res) => {
+app.post("/submit/a",async (req, res) => {
   //cek authorization header
   const auth_header = req.headers.authorization;
   if (!auth_header) {
@@ -143,27 +202,45 @@ app.post("/submit/a", (req, res) => {
       .toString()
       .split(":");
     //cek username apakah valid
-    if(!user.startsWith("13521") && !user.startsWith("18221")){
+    if (!user.startsWith("13521") && !user.startsWith("18221")) {
       res.status(401).send("Unauthorized to access endpoint");
       return;
     }
     //cek otp nya apakah valid
     if (
-      password !== generateOTP((process.env.SHARED_SECRET_BASE || "")+user)
+      password !== generateOTP((process.env.SHARED_SECRET_BASE || "") + user)
     ) {
       res.status(401).send("Unauthorized to access endpoint");
       return;
     }
+    //akses aman
+    //cek apakah fullname dan linknya ada
+    if (!req.body.fullName || !req.body.link) {
+      res.status(400).send("Please fix payload");
+      return;
+    }
+    //akses aman
+    //cek apakah udah ada
+    if(await isNIMSubmitted(user)){
+      res.status(409).send("You already submitted response for part a")
+      return;
+    }
+    //submit ke sheet
+    const payload: SubmitData = {
+      NIM: user,
+      fullName: req.body.fullName,
+      link: req.body.link,
+      message: req.body.message,
+    };
+    postData(payload);
+    res.status(201);
+    res.setHeader("Content-Type", "text/plain; charset=UTF-8");
+    res.send("Congratulations on completing part a!");
   } catch (err) {
     console.log(err);
     res.status(401).send("Unauthorized to access endpoint");
     return;
   }
-  //akses aman
-  //TODO: simpan request
-  res.status(201);
-  res.setHeader("Content-Type", "text/plain; charset=UTF-8");
-  res.send("Congratulations on completing part a!");
 });
 //buat submit bagian b
 app.post("/submit/b", (req, res) => {
@@ -180,27 +257,40 @@ app.post("/submit/b", (req, res) => {
       .toString()
       .split(":");
     //cek username apakah valid
-    if(!user.startsWith("13521") && !user.startsWith("18221")){
+    if (!user.startsWith("13521") && !user.startsWith("18221")) {
       res.status(401).send("Unauthorized to access endpoint");
       return;
     }
     //cek otp nya apakah valid
     if (
-      password !== generateOTP((process.env.SHARED_SECRET_BASE || "")+user)
+      password !== generateOTP((process.env.SHARED_SECRET_BASE || "") + user)
     ) {
       res.status(401).send("Unauthorized to access endpoint");
       return;
     }
+    //akses aman
+    //cek apakah fullname dan linknya ada
+    if (!req.body.fullName || !req.body.link) {
+      res.status(400).send("Please fix payload");
+      return;
+    }
+    //akses aman
+    // getData('A1:F4')
+    // const payload: SubmitData = {
+    //   NIM: user,
+    //   fullName: req.body.fullName,
+    //   link: req.body.link,
+    //   message: req.body.message,
+    // };
+    // postData(payload);
+    res.status(201);
+    res.setHeader("Content-Type", "text/plain; charset=UTF-8");
+    res.send("Congratulations on completing part b!");
   } catch (err) {
     console.log(err);
     res.status(401).send("Unauthorized to access endpoint");
     return;
   }
-  //akses aman
-  //TODO: simpan request
-  res.status(201);
-  res.setHeader("Content-Type", "text/plain; charset=UTF-8");
-  res.send("Congratulations on completing part b!");
 });
 
 app.listen(port, () => {
