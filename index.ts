@@ -47,6 +47,10 @@ app.post("/test", (req, res) => {
       .toString()
       .split(":");
     //cek username apakah valid
+    if(!user.startsWith("13521") && !user.startsWith("18221")){
+      res.status(401).send("Unauthorized to access endpoint");
+      return;
+    }
     //cek otp nya apakah valid
     if (
       password !== generateOTP((process.env.SHARED_SECRET_BASE || "")+user)
@@ -79,6 +83,10 @@ app.post("/submit/a", (req, res) => {
       .toString()
       .split(":");
     //cek username apakah valid
+    if(!user.startsWith("13521") && !user.startsWith("18221")){
+      res.status(401).send("Unauthorized to access endpoint");
+      return;
+    }
     //cek otp nya apakah valid
     if (
       password !== generateOTP((process.env.SHARED_SECRET_BASE || "")+user)
@@ -112,6 +120,10 @@ app.post("/submit/b", (req, res) => {
       .toString()
       .split(":");
     //cek username apakah valid
+    if(!user.startsWith("13521") && !user.startsWith("18221")){
+      res.status(401).send("Unauthorized to access endpoint");
+      return;
+    }
     //cek otp nya apakah valid
     if (
       password !== generateOTP((process.env.SHARED_SECRET_BASE || "")+user)
