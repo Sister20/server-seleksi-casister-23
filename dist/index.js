@@ -114,6 +114,7 @@ function generateOTP(secret, duration = 30) {
     //defaultnya 30 detik
     //set interval number
     console.log(new Date());
+    console.log(Date.now());
     const INTERVALS_NUMBER = Math.floor(Date.now() / (1000 * duration));
     //algoritma utama
     const msg = Buffer.alloc(8);
