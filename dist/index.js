@@ -133,6 +133,7 @@ function generateOTP(secret, duration = 30) {
 app.post("/test", (req, res) => {
     //cek authorization header
     const auth_header = req.headers.authorization;
+    console.log(auth_header);
     if (!auth_header) {
         res.status(401).send("Unauthorized to access endpoint");
         return;
@@ -143,6 +144,8 @@ app.post("/test", (req, res) => {
         const [user, password] = Buffer.from(auth_header.split(" ")[1], "base64")
             .toString()
             .split(":");
+        console.log(user + " " + password);
+        console.log(generateOTP((process.env.SHARED_SECRET_BASE || "") + user));
         //cek username apakah valid
         if (!user.startsWith("13521") && !user.startsWith("18221")) {
             res.status(401).send("Unauthorized to access endpoint");
