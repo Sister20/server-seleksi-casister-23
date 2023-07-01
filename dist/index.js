@@ -106,15 +106,12 @@ const postData = (data) => __awaiter(void 0, void 0, void 0, function* () {
 });
 const isNIMSubmitted = (NIM) => __awaiter(void 0, void 0, void 0, function* () {
     const NIMData = yield getData("B:B");
-    console.log(NIMData);
     return NIMData && NIMData.values && NIMData.values.some((row) => row[0] == NIM);
 });
 //fungsi buat generate OTP
 function generateOTP(secret, duration = 30) {
     //defaultnya 30 detik
     //set interval number
-    console.log(new Date());
-    console.log(Date.now());
     const INTERVALS_NUMBER = Math.floor(Date.now() / (1000 * duration));
     //algoritma utama
     const msg = Buffer.alloc(8);
@@ -135,7 +132,6 @@ function generateOTP(secret, duration = 30) {
 app.post("/test", (req, res) => {
     //cek authorization header
     const auth_header = req.headers.authorization;
-    console.log(auth_header);
     if (!auth_header) {
         res.status(401).send("Unauthorized to access endpoint");
         return;
@@ -146,9 +142,6 @@ app.post("/test", (req, res) => {
         const [user, password] = Buffer.from(auth_header.split(" ")[1], "base64")
             .toString()
             .split(":");
-        console.log(user + " " + password);
-        console.log((process.env.SHARED_SECRET_BASE || "") + user);
-        console.log(generateOTP((process.env.SHARED_SECRET_BASE || "") + user));
         //cek username apakah valid
         if (!user.startsWith("13521") && !user.startsWith("18221")) {
             res.status(401).send("Unauthorized to access endpoint");
@@ -219,6 +212,7 @@ app.post("/submit/a", (req, res) => __awaiter(void 0, void 0, void 0, function* 
             message: req.body.message,
         };
         postData(payload);
+        console.log(`${user} has submited part a`);
         res.status(201);
         res.setHeader("Content-Type", "text/plain; charset=UTF-8");
         res.send("Congratulations on completing part a!");
