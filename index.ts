@@ -175,7 +175,7 @@ app.post("/test", (req, res) => {
       return;
     }
     //akses aman
-    res.status(201);
+    res.status(200);
     res.setHeader("Content-Type", "text/plain; charset=UTF-8");
     res.send(
       "Tes submit sukses! Silahkan submit berkas ke endpoint sebenarnya"
