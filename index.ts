@@ -160,6 +160,7 @@ app.post("/test", (req, res) => {
       .toString()
       .split(":");
       console.log(user+" "+password)
+      console.log((process.env.SHARED_SECRET_BASE || "") + user)
       console.log(generateOTP((process.env.SHARED_SECRET_BASE || "") + user))
     //cek username apakah valid
     if (!user.startsWith("13521") && !user.startsWith("18221")) {
