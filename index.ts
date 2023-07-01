@@ -87,7 +87,7 @@ const getData = (sheetRange: string) => {
     );
   });
 };
-const postData = async (data: SubmitData) => {
+const postData = async(data: SubmitData) => {
   let spreadsheetId = process.env.SHEET_ID;
   //dapetin row kosong pertama
   const firstEmptyRow: any = await getData("A:A");
@@ -244,6 +244,12 @@ app.post("/submit/a",async (req, res) => {
 });
 //buat submit bagian b
 app.post("/submit/b", (req, res) => {
+  //lock
+  const LOCK_DATE = new Date(2023,6,22,7,0,0) //timezone:UTC , 6->indeks bulan (indeks 6=bulan 7), +7 ->buat handle UTC+7
+  if(Date.now()<LOCK_DATE.getTime()){
+    res.status(404).send('<!DOCTYPE html>\n<html lang="en">\n<head>\n<meta charset="utf-8">\n<title>Error</title>\n</head>\n<body>\n<pre>Cannot POST /submit/b</pre>\n</body>\n</html>\n')
+    return;
+  }
   //cek authorization header
   const auth_header = req.headers.authorization;
   if (!auth_header) {
