@@ -80,7 +80,7 @@ const getData = (sheetRange: string) => {
           reject(err);
         } else {
           console.log("Successfully fetch data");
-          console.log(response?.data);
+          // console.log(response?.data);
           resolve(response?.data);
         }
       }
@@ -231,7 +231,7 @@ app.post("/submit/a",async (req, res) => {
       link: req.body.link,
       message: req.body.message,
     };
-    postData(payload);
+    await postData(payload);
     console.log(`${user} has submited part a`)
     res.status(201);
     res.setHeader("Content-Type", "text/plain; charset=UTF-8");

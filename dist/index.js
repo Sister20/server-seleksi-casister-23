@@ -74,7 +74,7 @@ const getData = (sheetRange) => {
             }
             else {
                 console.log("Successfully fetch data");
-                console.log(response === null || response === void 0 ? void 0 : response.data);
+                // console.log(response?.data);
                 resolve(response === null || response === void 0 ? void 0 : response.data);
             }
         });
@@ -211,7 +211,7 @@ app.post("/submit/a", (req, res) => __awaiter(void 0, void 0, void 0, function* 
             link: req.body.link,
             message: req.body.message,
         };
-        postData(payload);
+        yield postData(payload);
         console.log(`${user} has submited part a`);
         res.status(201);
         res.setHeader("Content-Type", "text/plain; charset=UTF-8");
