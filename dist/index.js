@@ -41,6 +41,28 @@ const crypto = __importStar(require("crypto"));
 const dotenv = __importStar(require("dotenv"));
 const google = __importStar(require("googleapis"));
 const fs = __importStar(require("fs"));
+const util = __importStar(require("util"));
+//
+//fungsi buat authorization
+// async function _getGoogleSheetClient() {
+//   const auth = new google.Auth.GoogleAuth({
+//     keyFile: serviceAccountKeyFile,
+//     scopes: ['https://www.googleapis.com/auth/spreadsheets'],
+//   });
+//   const authClient = await auth.getClient();
+//   // return google.sheets_v4({
+//   //   version: 'v4',
+//   //   auth: authClient,
+//   // });
+//   return new google.sheets_v4.Sheets()
+// }
+// let jwtClient = new google.Auth.JWT(secr)
+const log_file = fs.createWriteStream(__dirname + '/log/debug.log', { flags: 'w' });
+const log_stdout = process.stdout;
+console.log = function (d) {
+    log_file.write(`[${new Date().toISOString()}] ${util.format(d)}\n`);
+    // log_stdout.write(`[${new Date().toISOString()}] ${util.format(d)}\n`);
+};
 const app = (0, express_1.default)();
 //configure express
 app.use(body_parser_1.default.json());
@@ -201,6 +223,7 @@ app.post("/submit/a", (req, res) => __awaiter(void 0, void 0, void 0, function* 
         //akses aman
         //cek apakah udah ada
         if (yield isNIMSubmitted(user)) {
+            console.log(`NIM ${user} already submitted`);
             res.status(409).send("You already submitted response for part a");
             return;
         }
@@ -211,6 +234,7 @@ app.post("/submit/a", (req, res) => __awaiter(void 0, void 0, void 0, function* 
             link: req.body.link,
             message: req.body.message,
         };
+        console.log("Waiting for writing date to sheet...");
         yield postData(payload);
         console.log(`${user} has submited part a`);
         res.status(201);

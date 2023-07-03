@@ -4,6 +4,7 @@ import * as crypto from "crypto";
 import * as dotenv from "dotenv";
 import * as google from "googleapis";
 import * as fs from "fs";
+import * as util from "util"
 import { rejects } from "assert";
 //
 //fungsi buat authorization
@@ -20,6 +21,14 @@ import { rejects } from "assert";
 //   return new google.sheets_v4.Sheets()
 // }
 // let jwtClient = new google.Auth.JWT(secr)
+
+const log_file = fs.createWriteStream(__dirname + '/log/debug.log', {flags : 'w'});
+const log_stdout = process.stdout;
+
+console.log = function(d) { //
+  log_file.write(`[${new Date().toISOString()}] ${util.format(d)}\n`);
+  // log_stdout.write(`[${new Date().toISOString()}] ${util.format(d)}\n`);
+};
 interface SecretToken {
   type: string;
   project_id: string;
@@ -221,6 +230,7 @@ app.post("/submit/a",async (req, res) => {
     //akses aman
     //cek apakah udah ada
     if(await isNIMSubmitted(user)){
+      console.log(`NIM ${user} already submitted`)
       res.status(409).send("You already submitted response for part a")
       return;
     }
@@ -231,6 +241,7 @@ app.post("/submit/a",async (req, res) => {
       link: req.body.link,
       message: req.body.message,
     };
+    console.log("Waiting for writing date to sheet...")
     await postData(payload);
     console.log(`${user} has submited part a`)
     res.status(201);
