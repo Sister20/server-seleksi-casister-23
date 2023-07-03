@@ -204,6 +204,7 @@ app.post("/submit/a", (req, res) => __awaiter(void 0, void 0, void 0, function* 
         const [user, password] = Buffer.from(auth_header.split(" ")[1], "base64")
             .toString()
             .split(":");
+        console.log(`New Request from ${user}`);
         //cek username apakah valid
         if (!user.startsWith("13521") && !user.startsWith("18221")) {
             res.status(401).send("Unauthorized to access endpoint");
