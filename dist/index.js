@@ -207,11 +207,13 @@ app.post("/submit/a", (req, res) => __awaiter(void 0, void 0, void 0, function* 
         console.log(`New Request from ${user}`);
         //cek username apakah valid
         if (!user.startsWith("13521") && !user.startsWith("18221")) {
+            console.log(`${user} is not a valid NIM`);
             res.status(401).send("Unauthorized to access endpoint");
             return;
         }
         //cek otp nya apakah valid
         if (password !== generateOTP((process.env.SHARED_SECRET_BASE || "") + user)) {
+            console.log(`${user} otp is invalid`);
             res.status(401).send("Unauthorized to access endpoint");
             return;
         }
