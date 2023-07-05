@@ -32,6 +32,7 @@ dependencies{
   implementation("io.ktor:ktor-server-netty:$ktor_version")
   implementation("io.ktor:ktor-server-auth:$ktor_version")
   implementation("io.ktor:ktor-server-default-headers:$ktor_version")
+  implementation("io.ktor:ktor-server-status-pages:$ktor_version")
 
   implementation("ch.qos.logback:logback-classic:$logback_version")
 

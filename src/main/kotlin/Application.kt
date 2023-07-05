@@ -16,8 +16,10 @@ import org.ktorm.database.Database
 import org.ktorm.dsl.*
 import io.github.cdimascio.dotenv.dotenv
 import io.github.cdimascio.dotenv.Dotenv
+//import io.ktor.client.engine.*
 import io.ktor.server.plugins.contentnegotiation.*
 import io.ktor.serialization.kotlinx.json.*
+import io.ktor.server.plugins.statuspages.*
 import org.kodein.di.*
 import org.kodein.type.*
 import org.kodein.di.ktor.*
@@ -58,7 +60,7 @@ fun Application.main(kodein: DI){
       realm = "Access to uploading"
       validate {credentials ->
         if(credentials.name == "" || credentials.password == ""){
-          application.log.info("Empty authorization header")
+          application.log.info("Empty authorization header");
           null
         }
         else{
@@ -122,7 +124,7 @@ fun Application.main(kodein: DI){
                 else if(res.totalRecords == 1){
                   val name = res.rowSet[Answers.fullname]
                   call.application.environment.log.info("$nim resubmitted for $part")
-                  call.respondText("You have already completed part $part, $name.", status = HttpStatusCode.NoContent)
+                  call.respondText("You have already completed part $part, $name.", status = HttpStatusCode.Conflict)
                 }
               }
             }
