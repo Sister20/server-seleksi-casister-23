@@ -124,7 +124,7 @@ fun Application.main(kodein: DI){
                 else if(res.totalRecords == 1){
                   val name = res.rowSet[Answers.fullname]
                   call.application.environment.log.info("$nim resubmitted for $part")
-                  call.respondText("You have already completed part $part, $name.", status = HttpStatusCode.Conflict)
+                  call.respondText("You have already completed part $part", status = HttpStatusCode.Conflict)
                 }
               }
             }
