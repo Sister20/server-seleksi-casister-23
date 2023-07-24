@@ -26,6 +26,8 @@ import org.kodein.di.ktor.*
 import org.flywaydb.core.Flyway
 import org.sqlite.SQLiteDataSource
 import kotlinx.serialization.json.Json
+import java.time.LocalDateTime
+import java.time.format.DateTimeFormatter
 
 fun main(args: Array<String>): Unit = io.ktor.server.netty.EngineMain.main(args)
 
@@ -111,12 +113,17 @@ fun Application.main(kodein: DI){
                     (Answers.nim eq nim) and (Answers.part eq part)
                   }
                 if(res.totalRecords == 0){
+                  //dapetin waktu sekarang
+                  val timeZone = ZoneId.of("GMT+7")
+                  val currentDateTime = LocalDateTime.now(timeZone)
+                  val isoString = currentDateTime.format(DateTimeFormatter.ISO_DATE_TIME)
                   db.insert(Answers){
                     set(it.nim, nim)
                     set(it.part, part)
                     set(it.fullname, data.fullName)
                     set(it.link, data.link)
                     set(it.message, data.message)
+                    set(it.submittedAt,isoString )
                   }
                   call.application.environment.log.info("$nim completed $part")
                   call.respondText("Congratulations on completing part $part!", status = HttpStatusCode.Created)
