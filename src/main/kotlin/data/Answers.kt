@@ -8,4 +8,5 @@ object Answers: Table<Nothing>("answers"){
   val fullname = varchar("fullname")
   val link = varchar("link")
   val message = varchar("message")
+  val submittedAt = varchar("submittedAt")
 }

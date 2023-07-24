@@ -4,5 +4,6 @@ CREATE TABLE answers (
   fullname TEXT,
   link TEXT,
   message TEXT,
+  submittedAt TEXT,
   PRIMARY KEY(nim, part)
 );
