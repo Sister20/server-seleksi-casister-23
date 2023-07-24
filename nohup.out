@@ -1,0 +1,71 @@
+Starting a Gradle Daemon, 1 stopped Daemon could not be reused, use --status for details
+Exception in thread "DisconnectableInputStream source reader" org.gradle.api.UncheckedIOException: java.io.IOException: Bad file descriptor
+	at org.gradle.internal.UncheckedException.throwAsUncheckedException(UncheckedException.java:62)
+	at org.gradle.internal.UncheckedException.throwAsUncheckedException(UncheckedException.java:41)
+	at org.gradle.util.internal.DisconnectableInputStream$1.run(DisconnectableInputStream.java:127)
+	at java.base/java.lang.Thread.run(Thread.java:829)
+Caused by: java.io.IOException: Bad file descriptor
+	at java.base/java.io.FileInputStream.readBytes(Native Method)
+	at java.base/java.io.FileInputStream.read(FileInputStream.java:279)
+	at java.base/java.io.BufferedInputStream.read1(BufferedInputStream.java:290)
+	at java.base/java.io.BufferedInputStream.read(BufferedInputStream.java:351)
+	at org.gradle.util.internal.DisconnectableInputStream$1.run(DisconnectableInputStream.java:98)
+	... 1 more
+> Task :compileKotlin UP-TO-DATE
+> Task :compileJava NO-SOURCE
+> Task :processResources UP-TO-DATE
+> Task :classes UP-TO-DATE
+
+> Task :run
+2023-07-06 03:49:55.521 [main] TRACE Application - {
+    # application.conf @ file:/root/server-seleksi-casister-23/build/resources/main/application.conf: 5
+    "application" : {
+        # application.conf @ file:/root/server-seleksi-casister-23/build/resources/main/application.conf: 6
+        "modules" : [
+            # application.conf @ file:/root/server-seleksi-casister-23/build/resources/main/application.conf: 6
+            "fun.suggoi.seleksister20.ApplicationKt.main"
+        ]
+    },
+    # application.conf @ file:/root/server-seleksi-casister-23/build/resources/main/application.conf: 2
+    "deployment" : {
+        # application.conf @ file:/root/server-seleksi-casister-23/build/resources/main/application.conf: 3
+        "port" : 3000
+    },
+    # Content hidden
+    "security" : "***"
+}
+
+2023-07-06 03:49:55.842 [main] INFO  Application - Autoreload is disabled because the development mode is off.
+2023-07-06 03:49:57.301 [main] INFO  o.f.c.i.license.VersionPrinter - Flyway Community Edition 8.5.10 by Redgate
+2023-07-06 03:49:57.308 [main] INFO  o.f.c.i.license.VersionPrinter - See what's new here: https://flywaydb.org/documentation/learnmore/releaseNotes#8.5.10
+2023-07-06 03:49:57.309 [main] INFO  o.f.c.i.license.VersionPrinter - 
+2023-07-06 03:49:57.312 [main] DEBUG o.f.c.internal.util.FeatureDetector - AWS SDK available: false
+2023-07-06 03:49:57.313 [main] DEBUG o.f.c.internal.util.FeatureDetector - Google Cloud Storage available: false
+2023-07-06 03:49:57.320 [main] DEBUG o.f.c.i.s.classpath.ClassPathScanner - Scanning for classpath resources at 'classpath:db/callback' ...
+2023-07-06 03:49:57.327 [main] DEBUG o.f.c.i.s.classpath.ClassPathScanner - Determining location urls for classpath:db/callback using ClassLoader jdk.internal.loader.ClassLoaders$AppClassLoader@8bcc55f ...
+2023-07-06 03:49:57.331 [main] DEBUG o.f.c.i.s.classpath.ClassPathScanner - Unable to resolve location classpath:db/callback.
+2023-07-06 03:49:57.334 [main] DEBUG o.f.c.i.s.classpath.ClassPathScanner - Scanning for classpath resources at 'classpath:db/migration' ...
+2023-07-06 03:49:57.338 [main] DEBUG o.f.c.i.s.classpath.ClassPathScanner - Determining location urls for classpath:db/migration using ClassLoader jdk.internal.loader.ClassLoaders$AppClassLoader@8bcc55f ...
+2023-07-06 03:49:57.339 [main] DEBUG o.f.c.i.s.classpath.ClassPathScanner - Scanning URL: file:/root/server-seleksi-casister-23/build/resources/main/db/migration
+2023-07-06 03:49:57.342 [main] DEBUG o.f.c.internal.util.FeatureDetector - JBoss VFS v2 available: false
+2023-07-06 03:49:57.346 [main] DEBUG o.f.c.i.s.c.FileSystemClassPathLocationScanner - Scanning starting at classpath root in filesystem: /root/server-seleksi-casister-23/build/resources/main/
+2023-07-06 03:49:57.355 [main] DEBUG o.f.c.i.s.c.FileSystemClassPathLocationScanner - Scanning for resources in path: /root/server-seleksi-casister-23/build/resources/main/db/migration (db/migration)
+2023-07-06 03:49:57.364 [main] DEBUG o.f.c.i.s.classpath.ClassPathScanner - Found resource: db/migration/V1__create_answers.sql
+2023-07-06 03:49:57.371 [main] DEBUG o.f.c.i.s.classpath.ClassPathScanner - Scanning for classes at classpath:db/migration
+2023-07-06 03:49:57.387 [main] DEBUG o.f.c.i.r.ResourceNameValidator - Validating V1__create_answers.sql
+2023-07-06 03:49:57.680 [main] INFO  o.f.c.i.d.base.BaseDatabaseType - Database: jdbc:sqlite:db/hasil.db (SQLite 3.36)
+2023-07-06 03:49:57.682 [main] DEBUG o.f.c.i.d.base.BaseDatabaseType - Driver  : SQLite JDBC 3.36.0.3
+2023-07-06 03:49:57.687 [main] DEBUG org.flywaydb.core.FlywayExecutor - DDL Transactions Supported: true
+2023-07-06 03:49:57.691 [main] DEBUG o.f.c.i.s.SchemaHistoryFactory - Schemas: 
+2023-07-06 03:49:57.692 [main] DEBUG o.f.c.i.s.SchemaHistoryFactory - Default schema: null
+2023-07-06 03:49:57.700 [main] DEBUG o.f.c.i.c.SqlScriptCallbackFactory - Scanning for SQL callbacks ...
+2023-07-06 03:49:57.725 [main] DEBUG o.f.core.internal.command.DbValidate - Validating migrations ...
+2023-07-06 03:49:57.767 [main] DEBUG o.f.core.internal.scanner.Scanner - Filtering out resource: db/migration/V1__create_answers.sql (filename: V1__create_answers.sql)
+2023-07-06 03:49:57.815 [main] INFO  o.f.core.internal.command.DbValidate - Successfully validated 1 migration (execution time 00:00.082s)
+2023-07-06 03:49:57.828 [main] DEBUG o.f.c.i.database.sqlite.SQLiteTable - Unable to lock "main"."flyway_schema_history" as SQLite does not support locking. No concurrent migration supported.
+2023-07-06 03:49:57.832 [main] INFO  o.f.core.internal.command.DbMigrate - Current version of schema "main": 1
+2023-07-06 03:49:57.834 [main] INFO  o.f.core.internal.command.DbMigrate - Schema "main" is up to date. No migration necessary.
+2023-07-06 03:49:57.836 [main] DEBUG org.flywaydb.core.FlywayExecutor - Memory usage: 6 of 15M
+2023-07-06 03:49:57.869 [main] INFO  org.ktorm.database - Connected to jdbc:sqlite:db/hasil.db, productName: SQLite, productVersion: 3.36.0, logger: org.ktorm.logging.Slf4jLoggerAdapter@4beddc56, dialect: org.ktorm.database.SqlDialectKt$detectDialectImplementation$1@79b663b3
+2023-07-06 03:49:57.994 [main] INFO  Application - Application auto-reloaded in 2.142 seconds.
+2023-07-06 03:49:58.472 [DefaultDispatcher-worker-1] INFO  Application - Responding at http://0.0.0.0:3000
